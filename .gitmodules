@@ -1,0 +1,3 @@
+[submodule "lib/fpga-ip"]
+	path = lib/fpga-ip
+	url = https://github.com/deejayfrankcesco/fpga-ip.git

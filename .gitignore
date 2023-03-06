@@ -1,0 +1,33 @@
+#Ignore All
+*
+
+## Then Exclude:
+
+#project specific directories
+!/rtl/
+!/IP/
+!/lib/
+!/const/
+
+!/rtl/**/
+!/IP/**/
+!/lib/**/
+!/const/**/
+
+#repo files
+!.gitignore
+!.gitmodules
+!README.md
+
+#Source files
+!*.vhd
+!*.v
+!*.sv
+!*.bd
+!*.xdc
+!*.xci
+
+#TCL to generate the project in the ise_project folder
+!/ise_project/
+/ise_project/*
+!/ise_project/ise_project.tcl
