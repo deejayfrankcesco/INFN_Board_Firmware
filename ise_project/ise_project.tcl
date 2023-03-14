@@ -231,8 +231,15 @@ proc add_source_files {} {
 
    puts "$myScript: Adding sources to project..."
 
+   xfile add "../IP/FIFO_ILA/FIFO_ILA.xco"
+   xfile add "../IP/ICON/ICON.xco"
+   xfile add "../IP/USB_FIFO_DOWNLINK/USB_FIFO_DOWNLINK.xco"
+   xfile add "../IP/USB_FIFO_UPLINK/USB_FIFO_UPLINK.xco"
+   xfile add "../IP/pre_trigger_FIFO_core/pre_trigger_FIFO_core.xco"
+   xfile add "../const/io.ucf"
    xfile add "../lib/fpga-ip/ACQUISITION/acquisition_control_16b/rtl/acquisition_control.vhd"
    xfile add "../lib/fpga-ip/INTERFACES/FT232H_core/rtl/FT232H_core.vhd"
+   xfile add "../lib/fpga-ip/MEMORY/Pre_Trigger_FIFO_Configurable/rtl/Pre_Trigger_FIFO.vhd"
    xfile add "../lib/fpga-ip/SPECIFIC/DOIN/doin_adc/rtl/adc_interface.vhd"
    xfile add "../lib/fpga-ip/SPECIFIC/DOIN/doin_board_config/rtl/board_config.vhd"
    xfile add "../lib/fpga-ip/SPECIFIC/DOIN/doin_i2cDACcontrollerBasic/rtl/DACConfigurator.vhd"
@@ -244,6 +251,9 @@ proc add_source_files {} {
    xfile add "../lib/fpga-ip/UTILITY/reset_synchroniser/rtl/reset_synchroniser.vhd"
    xfile add "../lib/fpga-ip/UTILITY/timestamp/rtl/timestamp.vhd"
    xfile add "../rtl/top/back_end_top.vhd"
+   puts ""
+   puts "WARNING: project contains IP cores, synthesis will fail if any of the cores require regenerating."
+   puts ""
 
    # Set the Top Module as well...
    project set top "Behavioral" "back_end_top"
@@ -297,6 +307,9 @@ proc set_process_props {} {
    project set "Place And Route Mode" "Route Only" -process "Place & Route"
    project set "Regenerate Core" "Under Current Project Setting" -process "Regenerate Core"
    project set "Filter Files From Compile Order" "true"
+   project set "Last Applied Goal" "Balanced"
+   project set "Last Applied Strategy" "Xilinx Default (unlocked)"
+   project set "Last Unlock Status" "false"
    project set "Manual Compile Order" "false"
    project set "Placer Effort Level" "High" -process "Map"
    project set "Extra Cost Tables" "0" -process "Map"

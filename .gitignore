@@ -3,21 +3,21 @@
 
 ## Then Exclude:
 
-#project specific directories
-!/rtl/
-!/IP/
-!/lib/
-!/const/
-
-!/rtl/**/
-!/IP/**/
-!/lib/**/
-!/const/**/
-
 #repo files
 !.gitignore
 !.gitmodules
 !README.md
+
+#project specific directories
+!/rtl/
+!/lib/
+!/const/
+!/IP/
+
+!/rtl/**/
+!/lib/**/
+!/const/**/
+!/IP/**/
 
 #Source files
 !*.vhd
@@ -26,6 +26,10 @@
 !*.bd
 !*.xdc
 !*.xci
+
+#Save only IP configuration files
+/IP/**/*.*
+!*.xco
 
 #TCL to generate the project in the ise_project folder
 !/ise_project/
