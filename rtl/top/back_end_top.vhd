@@ -5,7 +5,7 @@
 -- ___________________________________________________________
 --
 -- Francesco Martina @ 2021
--- v1.0
+-- v1.1
 --
 
 -- TODO
@@ -23,8 +23,8 @@ use UNISIM.VComponents.all;
 entity back_end_top is
     Port (
         -- general
-        CLK_40M     : in std_logic;
-        CLK_60M     : in std_logic;
+        CLK_40M_ext : in std_logic;
+        CLK_60M_ext : in std_logic;
         RSTn_BUTTON : in std_logic;
 
         -- LEDs
@@ -76,273 +76,17 @@ end back_end_top;
 
 architecture Behavioral of back_end_top is
 
-    -- FT232HL USB Interfaces
-    component ft232h_interface is
-        port (
-            clk        : in    std_logic;
-            rst        : in    std_logic;
-            in_tdata   : in    std_logic_vector(7 downto 0);
-            in_tvalid  : in    std_logic;
-            in_tready  : out   std_logic;
-            out_tdata  : out   std_logic_vector(7 downto 0);
-            out_tvalid : out   std_logic;
-            out_tready : in    std_logic;
-            ADBUS      : inout std_logic_vector(7 downto 0);
-            RXFn       : in    std_logic;
-            RDn        : out   std_logic;
-            OEn        : out   std_logic;
-            TXEn       : in    std_logic;
-            WRn        : out   std_logic;
-            SIWUn      : out   std_logic
-        );
-    end component ft232h_interface;
-
-    -- USB Interface to System (DOWNLINK) CDC FIFO 
-    -- (between the acquisition system and the FT232H device)
-    component USB_FIFO_DOWNLINK is
-        port (
-            m_aclk        : IN  STD_LOGIC;
-            s_aclk        : IN  STD_LOGIC;
-            s_aresetn     : IN  STD_LOGIC;
-            s_axis_tvalid : IN  STD_LOGIC;
-            s_axis_tready : OUT STD_LOGIC;
-            s_axis_tdata  : IN  STD_LOGIC_VECTOR(7 DOWNTO 0);
-            m_axis_tvalid : OUT STD_LOGIC;
-            m_axis_tready : IN  STD_LOGIC;
-            m_axis_tdata  : OUT STD_LOGIC_VECTOR(7 DOWNTO 0)
-        );
-    end component USB_FIFO_DOWNLINK;
-
-    -- System to USB (UPLINK) Interface CDC FIFO 
-    component USB_FIFO_UPLINK is
-        port (
-            rst    : IN  STD_LOGIC;
-            wr_clk : IN  STD_LOGIC;
-            rd_clk : IN  STD_LOGIC;
-            din    : IN  STD_LOGIC_VECTOR(15 DOWNTO 0);
-            wr_en  : IN  STD_LOGIC;
-            rd_en  : IN  STD_LOGIC;
-            dout   : OUT STD_LOGIC_VECTOR(7 DOWNTO 0);
-            full   : OUT STD_LOGIC;
-            empty  : OUT STD_LOGIC
-        );
-    end component USB_FIFO_UPLINK;
-
-    -- Board configuration module
-    component board_config is
-        port (
-            clk                            : in  std_logic;
-            rst                            : in  std_logic;
-            in_tdata                       : in  std_logic_vector(7 downto 0);
-            in_tvalid                      : in  std_logic;
-            in_tready                      : out std_logic;
-            sample_rate_divider            : out std_logic_vector(31 downto 0);
-            pre_trigger_size               : out std_logic_vector(31 downto 0);
-            post_trigger_size              : out std_logic_vector(31 downto 0);
-            trigger_threshold              : out std_logic_vector(11 downto 0);
-            trigger_polarity               : out std_logic;
-            trigger_hysteresis             : out std_logic_vector(7 downto 0);
-            trigger_mode                   : out std_logic_vector(2 downto 0);
-            trigger_auto_mode_timeout      : out std_logic_vector(31 downto 0);
-            trigger_continuous_mode_period : out std_logic_vector(31 downto 0);
-            trigger_holdoff_time           : out std_logic_vector(31 downto 0);
-            pulse_generator_period         : out std_logic_vector(31 downto 0);
-            pulse_generator_width          : out std_logic_vector(31 downto 0);
-            DAC_channel_A                  : out std_logic_vector(7 downto 0);
-            DAC_channel_B                  : out std_logic_vector(7 downto 0);
-            DAC_power_up_update            : out std_logic;
-            DAC_power_down                 : out std_logic;
-            general_reset_trigger          : out std_logic
-        );
-    end component board_config;
-
-    -- Acquisition controller module
-    component acquisition_control is
-        port (
-            clk                            : in  std_logic;
-            rst                            : in  std_logic;
-            in_tdata                       : in  std_logic_vector(15 downto 0);
-            in_tvalid                      : in  std_logic;
-            in_tready                      : out std_logic;
-            out_tdata                      : out std_logic_vector(15 downto 0);
-            out_tvalid                     : out std_logic;
-            out_tready                     : in  std_logic;
-            out_tlast                      : out std_logic;
-            pre_trigger_size               : in  std_logic_vector(31 downto 0);
-            post_trigger_size              : in  std_logic_vector(31 downto 0);
-            trigger_input                  : in  std_logic;
-            trigger_timestamp_input        : in  std_logic_vector(47 downto 0);
-            sample_rate_divider            : in  std_logic_vector(31 downto 0);
-            pre_trigger_full               : in  std_logic;
-            pre_trigger_FIFO_configuration : out std_logic_vector(31 downto 0);
-            trigger_miss                   : out std_logic;
-            armed_flag                     : out std_logic;
-            triggered_flag                 : out std_logic;
-            overrun_flag                   : out std_logic
-        );
-    end component acquisition_control;
-
-    -- Pre-Trigger samples FIFO memory
-    component pre_trigger_FIFO is
-        generic (
-            SAMPLE_WIDTH : natural := 12
-        );
-        port (
-            clk                 : in  std_logic;
-            rst                 : in  std_logic;
-            in_tdata            : in  std_logic_vector(SAMPLE_WIDTH-1 downto 0);
-            in_tvalid           : in  std_logic;
-            in_tready           : out std_logic;
-            out_tdata           : out std_logic_vector(SAMPLE_WIDTH-1 downto 0);
-            out_tvalid          : out std_logic;
-            out_tready          : in  std_logic;
-            pre_trigger_samples : in  std_logic_vector(31 downto 0);
-            pre_trigger_full    : out std_logic
-        );
-    end component pre_trigger_FIFO;
-
-    -- trigger system
-    component trigger_system is
-        generic (
-            SAMPLE_WIDTH : natural := 12
-        );
-        port (
-            clk                            : in  std_logic;
-            rst                            : in  std_logic;
-            adc_data_stream_in_tdata       : in  std_logic_vector(SAMPLE_WIDTH-1 downto 0);
-            adc_data_stream_in_tvalid      : in  std_logic;
-            adc_data_stream_out_tdata      : out std_logic_vector(SAMPLE_WIDTH-1 downto 0);
-            adc_data_stream_out_tvalid     : out std_logic;
-            trigger_threshold              : in  std_logic_vector(SAMPLE_WIDTH-1 downto 0);
-            trigger_polarity               : in  std_logic;
-            trigger_hysteresis             : in  std_logic_vector(7 downto 0);
-            trigger_mode                   : in  std_logic_vector(2 downto 0);
-            trigger_auto_mode_timeout      : in  std_logic_vector(31 downto 0);
-            trigger_continuous_mode_period : in  std_logic_vector(31 downto 0);
-            trigger_holdoff_time           : in  std_logic_vector(31 downto 0);
-            trigger                        : out std_logic;
-				trigger_stopped 					 : out std_logic
-        );
-    end component trigger_system;
-
-    -- ADC simplest input register
-    component ADC_interface is
-        port (
-            clk                 : in  std_logic;
-            rst                 : in  std_logic;
-            ADC_CLK_P           : out std_logic;
-            ADC_CLK_N           : out std_logic;
-            ADC                 : in  std_logic_vector(11 downto 0);
-            sample_rate_divider : in  std_logic_vector(31 downto 0);
-            adc_stream_tdata    : out std_logic_vector(11 downto 0);
-            adc_stream_tvalid   : out std_logic;
-            ADC_OEn             : out std_logic;
-            ADC_PD              : out std_logic
-        );
-    end component ADC_interface;
-
-    -- acquisition timestamp generator
-    component timestamp is
-        port (
-            clk       : in  std_logic;
-            rst       : in  std_logic;
-            timestamp : out std_logic_vector(47 downto 0)
-        );
-    end component timestamp;
-
-    -- LED Stretcher
-    component LED_stretcher is
-        generic (
-            CLOCK_FREQ   : real    := 40000000.0;
-            STRETCH_TIME : real    := 0.05;
-            POLARITY     : boolean := TRUE
-        );
-        port (
-            clk     : in  std_logic;
-            rst     : in  std_logic;
-            flag_in : in  std_logic;
-            LED_out : out std_logic
-        );
-    end component LED_stretcher;
-
-    -- DAC controller
-    component DACconfigurator is
-        port (
-            clk40           : in    std_logic;
-            rst             : in    std_logic;
-            DAC_channel_A   : in    std_logic_vector(7 downto 0);
-            DAC_channel_B   : in    std_logic_vector(7 downto 0);
-            power_up_update : in    std_logic;
-            power_down      : in    std_logic;
-            scl_io          : inout std_logic;
-            sda_io          : inout std_logic;
-            busy            : out   std_logic
-        );
-    end component DACconfigurator;
-
-    -- pulse generator
-    component pulse_generator is
-        port (
-            clk          : in  std_logic;
-            rst          : in  std_logic;
-            pulse_period : in  std_logic_vector(31 downto 0);
-            pulse_width  : in  std_logic_vector(31 downto 0);
-            pulse_out    : out std_logic
-        );
-    end component pulse_generator;
-
-    -- system reset controller
-    component reset_controller is
-        generic (
-            RST_CYCLES : integer := 100;
-            RST_DELAY  : integer := 10
-        );
-        port (
-            clk          : in  std_logic;
-            async_rst_in : in  std_logic;
-            sync_rst_in  : in  std_logic;
-            rst_out      : out std_logic;
-            rstn_out     : out std_logic
-        );
-    end component reset_controller;
-
-    -- reset synchroniser
-    component reset_synchroniser is
-        generic (
-            SYNCHRO_STAGES        : integer := 3;
-            SAFE_STABILITY_STAGES : integer := 3
-        );
-        port (
-            clk          : in  std_logic;
-            async_rst_in : in  std_logic;
-            rst_out      : out std_logic;
-            rstn_out     : out std_logic
-        );
-    end component reset_synchroniser;
-
-    ---- DEBUG
-    component ICON
-        PORT (
-            CONTROL0 : INOUT STD_LOGIC_VECTOR(35 DOWNTO 0)
-        );
-    end component;
-
-    component FIFO_ILA
-        PORT (
-            CONTROL : INOUT STD_LOGIC_VECTOR(35 DOWNTO 0);
-            CLK     : IN    STD_LOGIC;
-            TRIG0   : IN    STD_LOGIC_VECTOR(7 DOWNTO 0);
-            TRIG1   : IN    STD_LOGIC_VECTOR(0 TO 0);
-            TRIG2   : IN    STD_LOGIC_VECTOR(0 TO 0)
-        );
-    end component;
-
-    -- signals
+    ----------------------------------------------------------------------------
+    -- Signals
     ----------------------------------------------------------------------------
 
-    signal async_rst_general : std_logic;
+    -- clocks
+    signal CLK_40M : std_logic;
+    signal CLK_60M : std_logic;
 
-    -- these are all synchronised resets (to the correspective 40MHz or 60MHz domains)
+    -- internal reset
+    signal async_rst_general               : std_logic;
+    signal system_clock_locked             : std_logic;
     signal sync_rst_general_40             : std_logic;
     signal rst_trigger_40                  : std_logic;
     signal rst_general_combined_trigger_40 : std_logic;
@@ -350,7 +94,6 @@ architecture Behavioral of back_end_top is
     signal rstn_40                         : std_logic;
     signal rst_60                          : std_logic;
     signal rstn_60                         : std_logic;
-
 
     -- CDC <-> FIFO bus
     signal FIFO_in_tdata     : std_logic_vector(7 downto 0);
@@ -414,45 +157,44 @@ architecture Behavioral of back_end_top is
     signal pulse_generator_out : std_logic;
 
     -- diagnostics
-    signal armed_flag        : std_logic;
-	 signal trigger_stopped   : std_logic;
-    signal triggered_flag    : std_logic;
-    signal overrun_flag      : std_logic;
-	 signal armed_led         : std_logic;
+    signal armed_flag      : std_logic;
+    signal trigger_stopped : std_logic;
+    signal triggered_flag  : std_logic;
+    signal overrun_flag    : std_logic;
+    signal armed_led       : std_logic;
 
     ---- DEBUG
     signal CONTROL_ILA : std_logic_vector(35 downto 0);
 
 begin
 
+    ----------------------------------------------------------------------------
+    -- System General Clocking and Reset
+    ----------------------------------------------------------------------------
+
     -- reset connection
-    async_rst_general <= not RSTn_BUTTON;
+    async_rst_general   <= not RSTn_BUTTON;
+    sync_rst_general_40 <= not system_clock_locked;
 
-    -- default assignments (ADC and USB FIFO always on)
-    ADC_OEn      <= '0';
-    ADC_PD       <= '0';
-    FIFO_PWRSAVn <= '1';
-    ADC_CLK_P    <= CLK_40M;
-    ADC_CLK_N    <= not CLK_40M;
-
-    -- reset synchroniser used for the reset button
-    reset_synchroniser_push_button : reset_synchroniser
-        generic map (
-            SYNCHRO_STAGES        => 5,
-            SAFE_STABILITY_STAGES => 3
-        )
+    system_clock_i : entity work.system_clock
         port map (
-            clk          => CLK_40M,
-            async_rst_in => async_rst_general,
-            rst_out      => sync_rst_general_40,
-            rstn_out     => open
+            CLK_40M_ext => CLK_40M_ext,
+            CLK_40M     => CLK_40M,
+            RESET       => async_rst_general,
+            LOCKED      => system_clock_locked
+        );
+
+    USB_clock_driven_logics_BUFG : BUFG
+        port map (
+            O => CLK_60M,
+            I => CLK_60M_ext
         );
 
     -- combines the clean general reset (derived from the external push button) and the internal auto-reset
     rst_general_combined_trigger_40 <= sync_rst_general_40 or rst_trigger_40;
 
     -- reset controller to implement the auto-reset system, driven by board_config
-    reset_controller_i : reset_controller
+    reset_controller_i : entity work.reset_controller
         generic map (
             RST_CYCLES => 100,
             RST_DELAY  => 10
@@ -466,21 +208,126 @@ begin
         );
 
     -- reset synchroniser used between the two clock domains
-    reset_synchroniser_domain_crossing : reset_synchroniser
+    reset_synchroniser_domain_crossing : entity work.synchronizer
         generic map (
-            SYNCHRO_STAGES        => 1,
-            SAFE_STABILITY_STAGES => 2
+            STAGES => 5
         )
         port map (
-            clk          => CLK_60M,
-            async_rst_in => rst_40,
-            rst_out      => rst_60,
-            rstn_out     => rstn_60
+            clk      => CLK_60M,
+            aync_in  => rst_40,
+            sync_out => rst_60
+        );
+
+    rstn_60 <= not rst_60;
+
+    ----------------------------------------------------------------------------
+    -- Acquisition Signal Path
+    ----------------------------------------------------------------------------
+
+    -- ADC simplest input data register
+    ADC_interface_i : entity work.ADC_interface
+        port map (
+            clk                 => CLK_40M,
+            rst                 => rst_40,
+            ADC_CLK_P           => ADC_CLK_P,
+            ADC_CLK_N           => ADC_CLK_N,
+            ADC                 => ADC,
+            sample_rate_divider => sample_rate_divider,
+            adc_stream_tdata    => adc_data_stream_in_tdata,
+            adc_stream_tvalid   => adc_data_stream_in_tvalid,
+            ADC_OEn             => ADC_OEn,
+            ADC_PD              => ADC_PD
+        );
+
+    -- pre-trigger samples memory FIFO
+    pre_trigger_FIFO_i : entity work.pre_trigger_FIFO
+        generic map (
+            SAMPLE_WIDTH => 12
+        )
+        port map (
+            clk                 => CLK_40M,
+            rst                 => rst_40,
+            in_tdata            => adc_data_stream_out_tdata,
+            in_tvalid           => adc_data_stream_out_tvalid,
+            in_tready           => open,
+            out_tdata           => pre_trigger_out_tdata,
+            out_tvalid          => pre_trigger_out_tvalid,
+            out_tready          => pre_trigger_out_tready,
+            pre_trigger_samples => pre_trigger_FIFO_configuration,
+            pre_trigger_full    => pre_trigger_full
+        );
+
+    -- trigger system controller
+    trigger_system_i : entity work.trigger_system
+        generic map (
+            SAMPLE_WIDTH => 12
+        )
+        port map (
+            clk                            => CLK_40M,
+            rst                            => rst_40,
+            adc_data_stream_in_tdata       => adc_data_stream_in_tdata,
+            adc_data_stream_in_tvalid      => adc_data_stream_in_tvalid,
+            adc_data_stream_out_tdata      => adc_data_stream_out_tdata,
+            adc_data_stream_out_tvalid     => adc_data_stream_out_tvalid,
+            trigger_threshold              => trigger_threshold,
+            trigger_polarity               => trigger_polarity,
+            trigger_hysteresis             => trigger_hysteresis,
+            trigger_mode                   => trigger_mode,
+            trigger_auto_mode_timeout      => trigger_auto_mode_timeout,
+            trigger_continuous_mode_period => trigger_continuous_mode_period,
+            trigger_holdoff_time           => trigger_holdoff_time,
+            trigger                        => trigger,
+            trigger_stopped                => trigger_stopped
+        );
+
+    -- timestamp generator
+    timestamp_i : entity work.timestamp
+        port map (
+            clk       => CLK_40M,
+            rst       => rst_40,
+            timestamp => trigger_timestamp
+        );
+
+    -- Acquisition controller module
+    pre_trigger_out_tdata_extended <= "0000" & pre_trigger_out_tdata;
+
+    -- trigger is inhibited during the DAC configuration
+    trigger_acquisition <= trigger and not(DAC_configurator_busy);
+
+    acquisition_control_i : entity work.acquisition_control
+        port map (
+            clk                            => CLK_40M,
+            rst                            => rst_40,
+            in_tdata                       => pre_trigger_out_tdata_extended,
+            in_tvalid                      => pre_trigger_out_tvalid,
+            in_tready                      => pre_trigger_out_tready,
+            out_tdata                      => ACQUISITION_out_tdata,
+            out_tvalid                     => ACQUISITION_out_tvalid,
+            out_tready                     => ACQUISITION_out_tready,
+            out_tlast                      => open,
+            pre_trigger_size               => pre_trigger_size,
+            post_trigger_size              => post_trigger_size,
+            trigger_input                  => trigger_acquisition,
+            trigger_timestamp_input        => trigger_timestamp,
+            sample_rate_divider            => sample_rate_divider,
+            pre_trigger_full               => pre_trigger_full,
+            pre_trigger_FIFO_configuration => pre_trigger_FIFO_configuration,
+            trigger_miss                   => open,
+            armed_flag                     => armed_flag,
+            triggered_flag                 => triggered_flag,
+            overrun_flag                   => overrun_flag
         );
 
 
+    ----------------------------------------------------------------------------
+    -- USB Interface for Data Transmission and Board Configuration
+    ----------------------------------------------------------------------------
+
+    -- FT232H device always on
+    FIFO_PWRSAVn <= '1';
+
     -- USB FIFO Interface
-    ft232h_interface_i : ft232h_interface
+    ft232h_interface_i : entity work.ft232h_interface
         port map (
             clk        => CLK_60M,
             rst        => rst_60,
@@ -499,14 +346,13 @@ begin
             SIWUn      => FIFO_SIWUn
         );
 
-
     ACQUISITION_out_tready <= not USB_FIFO_UP_full;
     USB_FIFO_UP_wr_en      <= (ACQUISITION_out_tvalid and ACQUISITION_out_tready);
     FIFO_in_tvalid         <= not USB_FIFO_UP_empty;
     USB_FIFO_UP_rd_en      <= (FIFO_in_tvalid and FIFO_in_tready);
 
     -- CDC FIFO, from the acquisition system to the FT232H
-    USB_FIFO_UPLINK_i : USB_FIFO_UPLINK
+    USB_FIFO_UPLINK_i : entity work.USB_FIFO_UPLINK
         port map (
             rst    => rst_40,
             wr_clk => CLK_40M,
@@ -519,9 +365,8 @@ begin
             empty  => USB_FIFO_UP_empty
         );
 
-
     -- CDC FIFO, from the FT232H to the configuration module
-    USB_FIFO_DOWNLINK_i : USB_FIFO_DOWNLINK
+    USB_FIFO_DOWNLINK_i : entity work.USB_FIFO_DOWNLINK
         port map (
             m_aclk        => CLK_40M,
             s_aclk        => CLK_60M,
@@ -534,8 +379,12 @@ begin
             m_axis_tdata  => CONFIG_in_tdata
         );
 
+    ----------------------------------------------------------------------------
+    -- Board Control
+    ----------------------------------------------------------------------------
+
     -- Board configuration module
-    board_config_i : board_config
+    board_config_i : entity work.board_config
         port map (
             clk                            => CLK_40M,
             rst                            => rst_40,
@@ -561,102 +410,8 @@ begin
             general_reset_trigger          => rst_trigger_40
         );
 
-    -- Acquisition controller module
-    pre_trigger_out_tdata_extended <= "0000" & pre_trigger_out_tdata;
-
-    -- trigger is inhibited during the DAC configuration
-    trigger_acquisition <= trigger and not(DAC_configurator_busy);
-
-    acquisition_control_i : acquisition_control
-        port map (
-            clk                            => CLK_40M,
-            rst                            => rst_40,
-            in_tdata                       => pre_trigger_out_tdata_extended,
-            in_tvalid                      => pre_trigger_out_tvalid,
-            in_tready                      => pre_trigger_out_tready,
-            out_tdata                      => ACQUISITION_out_tdata,
-            out_tvalid                     => ACQUISITION_out_tvalid,
-            out_tready                     => ACQUISITION_out_tready,
-            out_tlast                      => open,
-            pre_trigger_size               => pre_trigger_size,
-            post_trigger_size              => post_trigger_size,
-            trigger_input                  => trigger_acquisition,
-            trigger_timestamp_input        => trigger_timestamp,
-            sample_rate_divider            => sample_rate_divider,
-            pre_trigger_full               => pre_trigger_full,
-            pre_trigger_FIFO_configuration => pre_trigger_FIFO_configuration,
-            trigger_miss                   => open,
-            armed_flag                     => armed_flag,
-            triggered_flag                 => triggered_flag,
-            overrun_flag                   => overrun_flag
-        );
-
-    -- pre-trigger samples memory FIFO
-    pre_trigger_FIFO_i : pre_trigger_FIFO
-        generic map (
-            SAMPLE_WIDTH => 12
-        )
-        port map (
-            clk                 => CLK_40M,
-            rst                 => rst_40,
-            in_tdata            => adc_data_stream_out_tdata,
-            in_tvalid           => adc_data_stream_out_tvalid,
-            in_tready           => open,
-            out_tdata           => pre_trigger_out_tdata,
-            out_tvalid          => pre_trigger_out_tvalid,
-            out_tready          => pre_trigger_out_tready,
-            pre_trigger_samples => pre_trigger_FIFO_configuration,
-            pre_trigger_full    => pre_trigger_full
-        );
-
-    -- trigger system controller
-    trigger_system_i : trigger_system
-        generic map (
-            SAMPLE_WIDTH => 12
-        )
-        port map (
-            clk                            => CLK_40M,
-            rst                            => rst_40,
-            adc_data_stream_in_tdata       => adc_data_stream_in_tdata,
-            adc_data_stream_in_tvalid      => adc_data_stream_in_tvalid,
-            adc_data_stream_out_tdata      => adc_data_stream_out_tdata,
-            adc_data_stream_out_tvalid     => adc_data_stream_out_tvalid,
-            trigger_threshold              => trigger_threshold,
-            trigger_polarity               => trigger_polarity,
-            trigger_hysteresis             => trigger_hysteresis,
-            trigger_mode                   => trigger_mode,
-            trigger_auto_mode_timeout      => trigger_auto_mode_timeout,
-            trigger_continuous_mode_period => trigger_continuous_mode_period,
-            trigger_holdoff_time           => trigger_holdoff_time,
-            trigger                        => trigger,
-				trigger_stopped                => trigger_stopped
-        );
-
-    -- timestamp generator
-    timestamp_i : entity work.timestamp
-        port map (
-            clk       => CLK_40M,
-            rst       => rst_40,
-            timestamp => trigger_timestamp
-        );
-
-    -- ADC simplest input data register
-    ADC_interface_i : ADC_interface
-        port map (
-            clk                 => CLK_40M,
-            rst                 => rst_40,
-            ADC_CLK_P           => ADC_CLK_P,
-            ADC_CLK_N           => ADC_CLK_N,
-            ADC                 => ADC,
-            sample_rate_divider => sample_rate_divider,
-            adc_stream_tdata    => adc_data_stream_in_tdata,
-            adc_stream_tvalid   => adc_data_stream_in_tvalid,
-            ADC_OEn             => ADC_OEn,
-            ADC_PD              => ADC_PD
-        );
-
     -- DAC configurator and I2C interface (I2C clock at 400kHz)
-    DACconfigurator_i : DACconfigurator
+    DACconfigurator_i : entity work.DACconfigurator
         port map (
             clk40           => CLK_40M,
             rst             => rst_40,
@@ -669,9 +424,13 @@ begin
             busy            => DAC_configurator_busy
         );
 
+    ----------------------------------------------------------------------------
+    -- Diagnostic LEDs
+    ----------------------------------------------------------------------------
+
     -- green LED (ARMED Acquisition)
-	 armed_led <= (not trigger_stopped) and armed_flag;
-    LED_stretcher_ARMED : LED_stretcher
+    armed_led <= (not trigger_stopped) and armed_flag;
+    LED_stretcher_ARMED : entity work.LED_stretcher
         generic map (
             CLOCK_FREQ   => 40000000.0,
             STRETCH_TIME => 0.08,
@@ -685,7 +444,7 @@ begin
         );
 
     -- blue LED (Acquisition TRIGGERED)
-    LED_stretcher_TRIGGERED : LED_stretcher
+    LED_stretcher_TRIGGERED : entity work.LED_stretcher
         generic map (
             CLOCK_FREQ   => 40000000.0,
             STRETCH_TIME => 0.01,
@@ -699,7 +458,7 @@ begin
         );
 
     -- red LED (OVERRUN Error)
-    LED_stretcher_OVERRUN : LED_stretcher
+    LED_stretcher_OVERRUN : entity work.LED_stretcher
         generic map (
             CLOCK_FREQ   => 40000000.0,
             STRETCH_TIME => 0.10,
@@ -712,7 +471,11 @@ begin
             LED_out => LED_R
         );
 
-    pulse_generator_i : pulse_generator
+    ----------------------------------------------------------------------------
+    -- Pulse Generator
+    ----------------------------------------------------------------------------
+
+    pulse_generator_i : entity work.pulse_generator
         port map (
             clk          => CLK_40M,
             rst          => rst_40,
@@ -729,13 +492,16 @@ begin
             I  => pulse_generator_out -- Buffer input 
         );
 
-    ---- DEBUG
-    ICON_i : ICON
+    ----------------------------------------------------------------------------
+    -- DEBUG modules
+    ----------------------------------------------------------------------------
+
+    ICON_i : entity work.ICON
         port map (
             CONTROL0 => CONTROL_ILA
         );
 
-    DATA_OUT_ILA_i : FIFO_ILA
+    DATA_OUT_ILA_i : entity work.FIFO_ILA
         port map (
             CONTROL  => CONTROL_ILA,
             CLK      => CLK_60M,
