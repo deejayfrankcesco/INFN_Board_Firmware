@@ -26,6 +26,7 @@
 !*.bd
 !*.xdc
 !*.xci
+!*.ucf
 
 #Save only IP configuration files
 /IP/**/*.*

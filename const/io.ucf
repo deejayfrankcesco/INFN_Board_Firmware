@@ -1,0 +1,144 @@
+#**************************************************************************************************************************************************#
+#                                            UCF for INFN DOIN Project Board v1.0                                                                  #
+#                                                   Francesco Martina @ 2021                                                                       #
+#**************************************************************************************************************************************************#
+NET "CLK_40M_ext" LOC = P56;
+NET "CLK_60M_ext" LOC = P87;
+
+###################################################################################################################################################
+#                                                 LEDs                                                                                            #
+################################################################################################################################################### 
+NET "LED_R"            LOC = P59  |IOSTANDARD = LVCMOS33 |DRIVE = 8 |SLEW = SLOW;
+NET "LED_G"            LOC = P58  |IOSTANDARD = LVCMOS33 |DRIVE = 8 |SLEW = SLOW;
+NET "LED_B"            LOC = P57  |IOSTANDARD = LVCMOS33 |DRIVE = 8 |SLEW = SLOW;
+
+###################################################################################################################################################
+#                                                 Push Button Switches                                                                            #
+################################################################################################################################################### 
+NET "RSTn_BUTTON"      LOC = P40  |IOSTANDARD = LVCMOS33;
+
+###################################################################################################################################################
+#                                                 ADC                                                                                             #
+###################################################################################################################################################
+NET "ADC[0]"           LOC = P27  |IOSTANDARD = LVCMOS33;
+NET "ADC[1]"           LOC = P26  |IOSTANDARD = LVCMOS33;
+NET "ADC[2]"           LOC = P24  |IOSTANDARD = LVCMOS33;
+NET "ADC[3]"           LOC = P23  |IOSTANDARD = LVCMOS33;
+NET "ADC[4]"           LOC = P22  |IOSTANDARD = LVCMOS33;
+NET "ADC[5]"           LOC = P21  |IOSTANDARD = LVCMOS33;
+NET "ADC[6]"           LOC = P17  |IOSTANDARD = LVCMOS33;
+NET "ADC[7]"           LOC = P16  |IOSTANDARD = LVCMOS33;
+NET "ADC[8]"           LOC = P15  |IOSTANDARD = LVCMOS33;
+NET "ADC[9]"           LOC = P14  |IOSTANDARD = LVCMOS33;
+NET "ADC[10]"          LOC = P12  |IOSTANDARD = LVCMOS33;
+NET "ADC[11]"          LOC = P11  |IOSTANDARD = LVCMOS33;
+
+NET "ADC_CLK_P"        LOC = P33  |IOSTANDARD = LVCMOS33 |DRIVE = 8 |SLEW = FAST;
+NET "ADC_CLK_N"        LOC = P32  |IOSTANDARD = LVCMOS33 |DRIVE = 8 |SLEW = FAST;
+
+NET "ADC_OEn"          LOC = P8   |IOSTANDARD = LVCMOS33 |DRIVE = 8 |SLEW = SLOW;
+NET "ADC_PD"           LOC = P7   |IOSTANDARD = LVCMOS33 |DRIVE = 8 |SLEW = SLOW;
+
+###################################################################################################################################################
+#                                                 Offset DAC                                                                                      #
+###################################################################################################################################################
+NET "SCL_DAC"          LOC = P2   |IOSTANDARD = LVCMOS33 |DRIVE = 8 |SLEW = SLOW;
+NET "SDA_DAC"          LOC = P1   |IOSTANDARD = LVCMOS33 |DRIVE = 8 |SLEW = SLOW;
+
+
+###################################################################################################################################################
+#                                                 FT232HL USB FIFO Interface                                                                      #
+###################################################################################################################################################
+NET "FIFO_D[0]"        LOC = P105 |IOSTANDARD = LVCMOS33 |DRIVE = 8 |SLEW = FAST;
+NET "FIFO_D[1]"        LOC = P104 |IOSTANDARD = LVCMOS33 |DRIVE = 8 |SLEW = FAST;
+NET "FIFO_D[2]"        LOC = P102 |IOSTANDARD = LVCMOS33 |DRIVE = 8 |SLEW = FAST;
+NET "FIFO_D[3]"        LOC = P101 |IOSTANDARD = LVCMOS33 |DRIVE = 8 |SLEW = FAST;
+NET "FIFO_D[4]"        LOC = P100 |IOSTANDARD = LVCMOS33 |DRIVE = 8 |SLEW = FAST;
+NET "FIFO_D[5]"        LOC = P99  |IOSTANDARD = LVCMOS33 |DRIVE = 8 |SLEW = FAST;
+NET "FIFO_D[6]"        LOC = P98  |IOSTANDARD = LVCMOS33 |DRIVE = 8 |SLEW = FAST;
+NET "FIFO_D[7]"        LOC = P97  |IOSTANDARD = LVCMOS33 |DRIVE = 8 |SLEW = FAST;
+
+NET "FIFO_RXFn"        LOC = P95  |IOSTANDARD = LVCMOS33 |DRIVE = 8 |SLEW = FAST |PULLUP;
+NET "FIFO_TXEn"        LOC = P94  |IOSTANDARD = LVCMOS33 |DRIVE = 8 |SLEW = FAST |PULLUP;
+NET "FIFO_RDn"         LOC = P93  |IOSTANDARD = LVCMOS33 |DRIVE = 8 |SLEW = FAST;
+NET "FIFO_WRn"         LOC = P92  |IOSTANDARD = LVCMOS33 |DRIVE = 8 |SLEW = FAST;
+NET "FIFO_SIWUn"       LOC = P88  |IOSTANDARD = LVCMOS33 |DRIVE = 8 |SLEW = FAST;
+NET "FIFO_OEn"         LOC = P85  |IOSTANDARD = LVCMOS33 |DRIVE = 8 |SLEW = FAST;
+NET "FIFO_PWRSAVn"     LOC = P84  |IOSTANDARD = LVCMOS33 |DRIVE = 8 |SLEW = FAST;
+
+###################################################################################################################################################
+#                                                 Configuration EEPROM                                                                            #
+###################################################################################################################################################
+#NET "EEDI"             LOC = P48  | IOSTANDARD = LVCMOS33 | DRIVE = 8 | SLEW = SLOW;
+#NET "EEDO"             LOC = P47  | IOSTANDARD = LVCMOS33 | DRIVE = 8 | SLEW = SLOW;
+#NET "EECS"             LOC = P46  | IOSTANDARD = LVCMOS33 | DRIVE = 8 | SLEW = SLOW;
+#NET "EECLK"            LOC = P45  | IOSTANDARD = LVCMOS33 | DRIVE = 8 | SLEW = SLOW;
+###################################################################################################################################################
+#                                                 HEADER PMOD                                                                                     #
+###################################################################################################################################################
+NET "PMOD[0]"          LOC = P124 |IOSTANDARD = LVCMOS33 |DRIVE = 8 |SLEW = FAST;    #Pin 1
+NET "PMOD[1]"          LOC = P123 |IOSTANDARD = LVCMOS33 |DRIVE = 8 |SLEW = FAST;    #2
+NET "PMOD[2]"          LOC = P121 |IOSTANDARD = LVCMOS33 |DRIVE = 8 |SLEW = FAST;    #3
+NET "PMOD[3]"          LOC = P120 |IOSTANDARD = LVCMOS33 |DRIVE = 8 |SLEW = FAST;    #4
+NET "PMOD[4]"          LOC = P119 |IOSTANDARD = LVCMOS33 |DRIVE = 8 |SLEW = FAST;    #5
+NET "PMOD[5]"          LOC = P118 |IOSTANDARD = LVCMOS33 |DRIVE = 8 |SLEW = FAST;    #6
+NET "PMOD[6]"          LOC = P117 |IOSTANDARD = LVCMOS33 |DRIVE = 8 |SLEW = FAST;    #7
+NET "PMOD[7]"          LOC = P116 |IOSTANDARD = LVCMOS33 |DRIVE = 8 |SLEW = FAST;    #8
+###################################################################################################################################################
+#                                                 SMA Connectors                                                                                  #
+###################################################################################################################################################
+#NET "SMA_A_P"          LOC = P134 | IOSTANDARD = LVDS_33 | DIFF_TERM = "TRUE";
+#NET "SMA_A_N"          LOC = P133 | IOSTANDARD = LVDS_33 | DIFF_TERM = "TRUE";
+#NET "SMA_B_P"          LOC = P132 | IOSTANDARD = LVDS_33 | DIFF_TERM = "TRUE";
+#NET "SMA_B_N"          LOC = P131 | IOSTANDARD = LVDS_33 | DIFF_TERM = "TRUE";
+NET "SMA_C_P"          LOC = P127 |IOSTANDARD = LVDS_33;# | DIFF_TERM = "TRUE";
+NET "SMA_C_N"          LOC = P126 |IOSTANDARD = LVDS_33;# | DIFF_TERM = "TRUE";
+###################################################################################################################################################
+#                                                 System Clocks                                                                                   #
+###################################################################################################################################################
+NET "CLK_40M_ext" TNM_NET = CLK_40M;
+TIMESPEC TS_CLK_40M = PERIOD "CLK_40M" 40 MHz HIGH 50% INPUT_JITTER 5 ps;
+NET "CLK_60M_ext" TNM_NET = CLK_60M;
+TIMESPEC TS_CLK_60M = PERIOD "CLK_60M" 60 MHz HIGH 50% INPUT_JITTER 10 ps;
+
+###################################################################################################################################################
+#                                                 Input Timings                                                                                   #
+###################################################################################################################################################
+#ADC Data Bus
+INST "ADC<0>" TNM = ADC_data_bus_group;
+INST "ADC<1>" TNM = ADC_data_bus_group;
+INST "ADC<2>" TNM = ADC_data_bus_group;
+INST "ADC<3>" TNM = ADC_data_bus_group;
+INST "ADC<4>" TNM = ADC_data_bus_group;
+INST "ADC<5>" TNM = ADC_data_bus_group;
+INST "ADC<6>" TNM = ADC_data_bus_group;
+INST "ADC<7>" TNM = ADC_data_bus_group;
+INST "ADC<8>" TNM = ADC_data_bus_group;
+INST "ADC<9>" TNM = ADC_data_bus_group;
+INST "ADC<10>" TNM = ADC_data_bus_group;
+INST "ADC<11>" TNM = ADC_data_bus_group;
+TIMEGRP "ADC_data_bus_group" OFFSET = IN 8.0 ns VALID 10.0 ns BEFORE "CLK_40M_ext" RISING;
+
+#FT232H Data Bus
+INST "FIFO_D<0>" TNM = USB_FIFO_data_bus_group;
+INST "FIFO_D<1>" TNM = USB_FIFO_data_bus_group;
+INST "FIFO_D<2>" TNM = USB_FIFO_data_bus_group;
+INST "FIFO_D<3>" TNM = USB_FIFO_data_bus_group;
+INST "FIFO_D<4>" TNM = USB_FIFO_data_bus_group;
+INST "FIFO_D<5>" TNM = USB_FIFO_data_bus_group;
+INST "FIFO_D<6>" TNM = USB_FIFO_data_bus_group;
+INST "FIFO_D<7>" TNM = USB_FIFO_data_bus_group;
+TIMEGRP "USB_FIFO_data_bus_group" OFFSET = IN 7.666 ns VALID 7.666 ns BEFORE "CLK_60M_ext" RISING;
+
+###################################################################################################################################################
+#                                                 Output Timings                                                                                  #
+###################################################################################################################################################
+
+#FT232H Flags
+NET "FIFO_RXFn" OFFSET = IN 7.666 ns VALID 7.666 ns BEFORE "CLK_60M_ext" RISING;
+NET "FIFO_TXEn" OFFSET = IN 7.666 ns VALID 7.666 ns BEFORE "CLK_60M_ext" RISING;
+
+
+
+#Created by Constraints Editor (xc6slx9-tqg144-2) - 2023/04/04
+#NET "ADC_PD" OFFSET = OUT 25 ns AFTER "CLK_40M_ext";
