@@ -163,8 +163,8 @@ architecture Behavioral of back_end_top is
     signal overrun_flag    : std_logic;
     signal armed_led       : std_logic;
 
-    ---- DEBUG
-    signal CONTROL_ILA : std_logic_vector(35 downto 0);
+    ---- DEBUG CORE
+    --signal CONTROL_ILA : std_logic_vector(35 downto 0);
 
 begin
 
@@ -496,19 +496,19 @@ begin
     -- DEBUG modules
     ----------------------------------------------------------------------------
 
-    ICON_i : entity work.ICON
-        port map (
-            CONTROL0 => CONTROL_ILA
-        );
+    --ICON_i : entity work.ICON
+    --    port map (
+    --        CONTROL0 => CONTROL_ILA
+    --    );
 
-    DATA_OUT_ILA_i : entity work.FIFO_ILA
-        port map (
-            CONTROL  => CONTROL_ILA,
-            CLK      => CLK_60M,
-            TRIG0    => FIFO_in_tdata,
-            TRIG1(0) => FIFO_in_tvalid,
-            TRIG2(0) => FIFO_in_tready
-        );
+    --DATA_OUT_ILA_i : entity work.FIFO_ILA
+    --    port map (
+    --        CONTROL  => CONTROL_ILA,
+    --        CLK      => CLK_60M,
+    --        TRIG0    => FIFO_in_tdata,
+    --        TRIG1(0) => FIFO_in_tvalid,
+    --        TRIG2(0) => FIFO_in_tready
+    --    );
 
     -- PMOD diagnostic
     PMOD <= "00" & DAC_power_up_update & DAC_power_down & DAC_configurator_busy & pulse_generator_out & adc_data_stream_in_tvalid & trigger_acquisition;

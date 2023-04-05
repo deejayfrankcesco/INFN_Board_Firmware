@@ -102,8 +102,9 @@ NET "CLK_60M_ext" TNM_NET = CLK_60M;
 TIMESPEC TS_CLK_60M = PERIOD "CLK_60M" 60 MHz HIGH 50% INPUT_JITTER 10 ps;
 
 ###################################################################################################################################################
-#                                                 Input Timings                                                                                   #
+#                                                 Buses                                                                                           #
 ###################################################################################################################################################
+
 #ADC Data Bus
 INST "ADC<0>" TNM = ADC_data_bus_group;
 INST "ADC<1>" TNM = ADC_data_bus_group;
@@ -117,9 +118,8 @@ INST "ADC<8>" TNM = ADC_data_bus_group;
 INST "ADC<9>" TNM = ADC_data_bus_group;
 INST "ADC<10>" TNM = ADC_data_bus_group;
 INST "ADC<11>" TNM = ADC_data_bus_group;
-TIMEGRP "ADC_data_bus_group" OFFSET = IN 8.0 ns VALID 10.0 ns BEFORE "CLK_40M_ext" RISING;
 
-#FT232H Data Bus
+#FT232H Data Bus Group
 INST "FIFO_D<0>" TNM = USB_FIFO_data_bus_group;
 INST "FIFO_D<1>" TNM = USB_FIFO_data_bus_group;
 INST "FIFO_D<2>" TNM = USB_FIFO_data_bus_group;
@@ -128,17 +128,29 @@ INST "FIFO_D<4>" TNM = USB_FIFO_data_bus_group;
 INST "FIFO_D<5>" TNM = USB_FIFO_data_bus_group;
 INST "FIFO_D<6>" TNM = USB_FIFO_data_bus_group;
 INST "FIFO_D<7>" TNM = USB_FIFO_data_bus_group;
-TIMEGRP "USB_FIFO_data_bus_group" OFFSET = IN 7.666 ns VALID 7.666 ns BEFORE "CLK_60M_ext" RISING;
 
 ###################################################################################################################################################
-#                                                 Output Timings                                                                                  #
+#                                                 Input Timings                                                                                   #
 ###################################################################################################################################################
+
+#ADC Data Bus
+TIMEGRP "ADC_data_bus_group" OFFSET = IN 11.0 ns VALID 16.0 ns BEFORE "CLK_40M_ext" RISING;
+
+#FT232H Data Bus Input
+TIMEGRP "USB_FIFO_data_bus_group" OFFSET = IN 7.666 ns VALID 7.666 ns BEFORE "CLK_60M_ext" RISING;
 
 #FT232H Flags
 NET "FIFO_RXFn" OFFSET = IN 7.666 ns VALID 7.666 ns BEFORE "CLK_60M_ext" RISING;
 NET "FIFO_TXEn" OFFSET = IN 7.666 ns VALID 7.666 ns BEFORE "CLK_60M_ext" RISING;
 
+###################################################################################################################################################
+#                                                 Output Timings                                                                                  #
+###################################################################################################################################################
 
+#FT232H Data Bus Output
+TIMEGRP "USB_FIFO_data_bus_group" OFFSET = OUT 7.5 ns VALID 7.5 ns BEFORE "CLK_60M_ext" RISING;
 
-#Created by Constraints Editor (xc6slx9-tqg144-2) - 2023/04/04
-#NET "ADC_PD" OFFSET = OUT 25 ns AFTER "CLK_40M_ext";
+#FT232H Controls
+NET "FIFO_RDn" OFFSET = OUT 7.5 ns VALID 7.5 ns BEFORE "CLK_60M_ext" RISING;
+NET "FIFO_WRn" OFFSET = OUT 7.5 ns VALID 7.5 ns BEFORE "CLK_60M_ext" RISING;
+NET "FIFO_OEn" OFFSET = OUT 7.5 ns VALID 7.5 ns BEFORE "CLK_60M_ext" RISING;
