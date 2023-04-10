@@ -104,7 +104,6 @@ TIMESPEC TS_CLK_60M = PERIOD "CLK_60M" 60 MHz HIGH 50% INPUT_JITTER 10 ps;
 ###################################################################################################################################################
 #                                                 Buses                                                                                           #
 ###################################################################################################################################################
-
 #ADC Data Bus
 INST "ADC<0>" TNM = ADC_data_bus_group;
 INST "ADC<1>" TNM = ADC_data_bus_group;
@@ -130,11 +129,30 @@ INST "FIFO_D<6>" TNM = USB_FIFO_data_bus_group;
 INST "FIFO_D<7>" TNM = USB_FIFO_data_bus_group;
 
 ###################################################################################################################################################
-#                                                 Input Timings                                                                                   #
+#                                                 Registers in IO                                                                                 #
 ###################################################################################################################################################
 
-#ADC Data Bus
-#TIMEGRP "ADC_data_bus_group" OFFSET = IN 11.0 ns VALID 16.0 ns BEFORE "ADC_CLK_P" RISING;
+INST "ADC_interface_i/adc_stream_tdata_0" IOB = TRUE;
+INST "ADC_interface_i/adc_stream_tdata_1" IOB = TRUE;
+INST "ADC_interface_i/adc_stream_tdata_2" IOB = TRUE;
+INST "ADC_interface_i/adc_stream_tdata_3" IOB = TRUE;
+INST "ADC_interface_i/adc_stream_tdata_4" IOB = TRUE;
+INST "ADC_interface_i/adc_stream_tdata_5" IOB = TRUE;
+INST "ADC_interface_i/adc_stream_tdata_6" IOB = TRUE;
+INST "ADC_interface_i/adc_stream_tdata_7" IOB = TRUE;
+INST "ADC_interface_i/adc_stream_tdata_8" IOB = TRUE;
+INST "ADC_interface_i/adc_stream_tdata_9" IOB = TRUE;
+INST "ADC_interface_i/adc_stream_tdata_10" IOB = TRUE;
+INST "ADC_interface_i/adc_stream_tdata_11" IOB = TRUE;
+
+###################################################################################################################################################
+#                                                 Input Timings                                                                                   #
+###################################################################################################################################################
+#ADC Data Bus (7ns of delay CLK_40M_ext to ADC_CLK_P)
+#TIMEGRP "ADC_data_bus_group" OFFSET = IN 11.0 ns VALID 16.0 ns BEFORE "CLK_40M_ext" RISING;
+
+#ADC Data Bus including the ~7ns of delay CLK_40M_ext to ADC_CLK_P in Grade 3 Devices or ~9ns in Grade 2 Devices
+TIMEGRP "ADC_data_bus_group" OFFSET = IN 2.0 ns VALID 16.0 ns BEFORE "CLK_40M_ext" RISING;
 
 #FT232H Data Bus Input
 TIMEGRP "USB_FIFO_data_bus_group" OFFSET = IN 7.666 ns VALID 7.666 ns BEFORE "CLK_60M_ext" RISING;
@@ -146,7 +164,6 @@ NET "FIFO_TXEn" OFFSET = IN 7.666 ns VALID 7.666 ns BEFORE "CLK_60M_ext" RISING;
 ###################################################################################################################################################
 #                                                 Output Timings                                                                                  #
 ###################################################################################################################################################
-
 #FT232H Data Bus Output
 TIMEGRP "USB_FIFO_data_bus_group" OFFSET = OUT 7.5 ns VALID 7.5 ns BEFORE "CLK_60M_ext" RISING;
 
@@ -154,3 +171,9 @@ TIMEGRP "USB_FIFO_data_bus_group" OFFSET = OUT 7.5 ns VALID 7.5 ns BEFORE "CLK_6
 NET "FIFO_RDn" OFFSET = OUT 7.5 ns VALID 7.5 ns BEFORE "CLK_60M_ext" RISING;
 NET "FIFO_WRn" OFFSET = OUT 7.5 ns VALID 7.5 ns BEFORE "CLK_60M_ext" RISING;
 NET "FIFO_OEn" OFFSET = OUT 7.5 ns VALID 7.5 ns BEFORE "CLK_60M_ext" RISING;
+
+###################################################################################################################################################
+#                                                 Report Only                                                                                     #
+###################################################################################################################################################
+#ADC Clock internally generated
+NET "ADC_CLK_P" OFFSET = OUT AFTER "CLK_40M_ext";

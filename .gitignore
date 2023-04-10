@@ -13,11 +13,15 @@
 !/lib/
 !/const/
 !/IP/
+!/vrf/
+!/bitstream/
 
 !/rtl/**/
 !/lib/**/
 !/const/**/
 !/IP/**/
+!/vrf/**/
+!/bitstream/**/
 
 #Source files
 !*.vhd
@@ -27,6 +31,10 @@
 !*.xdc
 !*.xci
 !*.ucf
+
+#Bitstream / Flash Files
+!*.bit
+!*.mcs
 
 #Save only IP configuration files
 /IP/**/*.*
