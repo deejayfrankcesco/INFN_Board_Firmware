@@ -119,7 +119,7 @@ INST "ADC<9>" TNM = ADC_data_bus_group;
 INST "ADC<10>" TNM = ADC_data_bus_group;
 INST "ADC<11>" TNM = ADC_data_bus_group;
 
-#FT232H Data Bus Group
+#FT232H Bi-Direction Data Bus Group
 INST "FIFO_D<0>" TNM = USB_FIFO_data_bus_group;
 INST "FIFO_D<1>" TNM = USB_FIFO_data_bus_group;
 INST "FIFO_D<2>" TNM = USB_FIFO_data_bus_group;
@@ -134,7 +134,7 @@ INST "FIFO_D<7>" TNM = USB_FIFO_data_bus_group;
 ###################################################################################################################################################
 
 #ADC Data Bus
-TIMEGRP "ADC_data_bus_group" OFFSET = IN 11.0 ns VALID 16.0 ns BEFORE "CLK_40M_ext" RISING;
+#TIMEGRP "ADC_data_bus_group" OFFSET = IN 11.0 ns VALID 16.0 ns BEFORE "ADC_CLK_P" RISING;
 
 #FT232H Data Bus Input
 TIMEGRP "USB_FIFO_data_bus_group" OFFSET = IN 7.666 ns VALID 7.666 ns BEFORE "CLK_60M_ext" RISING;
